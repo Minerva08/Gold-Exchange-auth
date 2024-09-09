@@ -1,0 +1,22 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.gold.proto";
+
+message LoginRequestDto {
+  string userId = 1;
+  string password = 2;
+}
+
+message LoginResponseDto {
+  string userId=1;
+  string password=2;
+  string address =3;
+  string accessToken = 4;
+  string refreshToken = 5;
+}
+
+
+service JwtService {
+  rpc loginUser(LoginRequestDto) returns (LoginResponseDto);
+
+}
