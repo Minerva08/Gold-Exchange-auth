@@ -32,6 +32,8 @@ public class User {
 
     private Date birth;
 
+    private String password;
+
     @Enumerated(EnumType.STRING)
     private MemberStatus status;
 
