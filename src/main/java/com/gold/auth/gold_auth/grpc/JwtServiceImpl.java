@@ -10,8 +10,10 @@ import com.gold.auth.gold_auth.util.BCryptPasswordEncoderBean;
 import com.gold.auth.gold_auth.util.jwt.JwtUtil;
 import com.gold.auth.gold_auth.util.jwt.TokenType;
 import com.gold.proto.JwtServiceGrpc;
+import com.gold.proto.JwtTokenReIssueResponseDto;
 import com.gold.proto.LoginRequestDto;
 import com.gold.proto.LoginResponseDto;
+import com.gold.proto.RefreshTokenRequestDto;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -52,8 +54,8 @@ public class JwtServiceImpl extends JwtServiceGrpc.JwtServiceImplBase {
 
         // refreshToken Redis
         // JWT 생성
-        String accessToken = jwtUtil.createJwt(TokenType.AT.getType(), request.getUserId());
-        String refreshToken = jwtUtil.createJwt(TokenType.RT.getType(), request.getUserId());
+        String accessToken = jwtUtil.createJwt(TokenType.AT.getType(), request.getUserId(),userInfo.getAddress());
+        String refreshToken = jwtUtil.createJwt(TokenType.RT.getType(), request.getUserId(),null);
 
         // Redis에 Refresh Token 저장
         saveRefreshToken(request.getUserId(), refreshToken);
@@ -80,4 +82,37 @@ public class JwtServiceImpl extends JwtServiceGrpc.JwtServiceImplBase {
         }
     }
 
+    @Override
+    public void reIssueToken(RefreshTokenRequestDto request,
+        StreamObserver<JwtTokenReIssueResponseDto> responseObserver) {
+
+        String userId = request.getUserId();
+        String refreshToken = redisService.getRefreshToken(userId);
+        User byUserId = userRepository.findByUserId(userId);
+
+        if(byUserId==null){
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+        if(refreshToken==null){
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+
+        if(request.getRefreshToken().equals(refreshToken)){
+
+            // refreshToken Redis
+            // JWT 생성
+            String reRefreshToken = jwtUtil.createJwt(TokenType.RT.getType(), request.getUserId(),null);
+            redisService.saveRefreshToken(userId,reRefreshToken);
+        }
+        String reAccessToken = jwtUtil.createJwt(TokenType.AT.getType(), request.getUserId(),byUserId.getAddress());
+
+        JwtTokenReIssueResponseDto reIssueResDto = JwtTokenReIssueResponseDto.newBuilder()
+            .setUserId(userId)
+            .setAccessToken(reAccessToken)
+            .setRefreshToken(refreshToken)
+            .build();
+
+        responseObserver.onNext(reIssueResDto);
+        responseObserver.onCompleted();
+    }
 }

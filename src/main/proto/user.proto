@@ -14,30 +14,7 @@ message JoinResponseDto{
   string encryptedPw=2;
 }
 
-
-message JwtTokenRequest {
-  string userId=1;
-}
-
-message RefreshTokenRequestDto {
-  string refreshToken=1;
-}
-
-message RefreshTokenResponseDto {
-  string userId=1;
-  string authStatus=2;
-}
-
-message JwtTokenReIssueResponseDto {
-  string userId=1;
-  string refreshToken=2;
-  string accessToken=3;
-}
-
-
 service AuthService {
   rpc registerUser(JoinRequestDto) returns (JoinResponseDto);
-  rpc getUserAuthByRefreshToken(RefreshTokenRequestDto) returns (RefreshTokenResponseDto);
-  rpc getUserAuthReIssue(RefreshTokenRequestDto) returns (JwtTokenReIssueResponseDto);
 
 }

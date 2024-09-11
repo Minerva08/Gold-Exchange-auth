@@ -4,6 +4,8 @@ package com.gold.auth.gold_auth.util.jwt;
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -43,9 +45,11 @@ public class JwtUtil {
             .get("category", String.class);
     }
 
-    public String createJwt(String category, String userId) {
+    public String createJwt(String category, String userId, String address) {
+
         return Jwts.builder()
             .claim("category", category)
+            .claim("address",address)
             .claim("userId", userId)
             .issuedAt(new Date(System.currentTimeMillis()))
             .expiration(new Date(

@@ -15,8 +15,19 @@ message LoginResponseDto {
   string refreshToken = 5;
 }
 
+message RefreshTokenRequestDto {
+  string refreshToken=1;
+  string userId=2;
+}
+
+message JwtTokenReIssueResponseDto {
+  string userId=1;
+  string refreshToken=2;
+  string accessToken=3;
+}
 
 service JwtService {
   rpc loginUser(LoginRequestDto) returns (LoginResponseDto);
+  rpc reIssueToken(RefreshTokenRequestDto) returns (JwtTokenReIssueResponseDto);
 
 }
